@@ -1,13 +1,13 @@
 package com.example.cinema;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-
+import org.springframework.web.bind.annotation.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import org.springframework.web.bind.annotation.DeleteMapping;
-
 
 @RestController
 @RequestMapping("/api")
@@ -17,69 +17,63 @@ public class BookingController {
     @Autowired
     private BookingRepository bookingRepository;
 
-    // 1. API ĐẶT VÉ MỚI
+    // 1. API ĐẶT VÉ (Lưu thành 1 hóa đơn)
     @PostMapping("/book")
     public ResponseEntity<String> bookTickets(@RequestBody BookingRequest request) {
-        String movie = request.getMovieName();
-        List<String> seats = request.getSeats();
+        Booking booking = new Booking();
+        booking.setUsername(request.getUsername());
+        booking.setMovieName(request.getMovieName());
+        booking.setRoom(request.getRoom()); // Lưu Rạp
+        booking.setShowDate(request.getShowDate()); 
+        booking.setShowTime(request.getShowTime()); 
+        booking.setSeats(String.join(", ", request.getSeats()));
+        booking.setFoods(request.getFoods());
+        booking.setTotalPrice(request.getTotalPrice());
         
-        // Lưu từng ghế vào Database
-        for (String seat : seats) {
-            Booking newBooking = new Booking(movie, seat);
-            bookingRepository.save(newBooking);
+        bookingRepository.save(booking);
+        return ResponseEntity.ok("Thành công");
+    }
+
+    // 2. API LẤY GHẾ ĐÃ BÁN (Cắt chuỗi ra lại thành mảng)
+   @GetMapping("/booked-seats")
+    public ResponseEntity<List<String>> getBookedSeats(
+            @RequestParam String movie, 
+            @RequestParam String room, 
+            @RequestParam String date, 
+            @RequestParam String time) {
+        
+        List<Booking> bookings = bookingRepository.findByMovieNameAndRoomAndShowDateAndShowTime(movie, room, date, time);
+        List<String> allBookedSeats = new ArrayList<>();
+        for (Booking b : bookings) {
+            if (b.getSeats() != null && !b.getSeats().isEmpty()) {
+                allBookedSeats.addAll(Arrays.asList(b.getSeats().split(", ")));
+            }
         }
-        
-        // In ra terminal để theo dõi
-        System.out.println("---> CÓ KHÁCH ĐẶT VÉ!");
-        System.out.println("Phim: " + movie + " | Ghế: " + seats);
-        
-        return ResponseEntity.ok("Thành công! Bạn đã đặt " + seats.size() + " ghế cho phim " + movie + ".");
+        return ResponseEntity.ok(allBookedSeats);
     }
 
-    // 2. API TẢI GHẾ ĐÃ BÁN CỦA 1 PHIM
-    @GetMapping("/booked-seats")
-    public ResponseEntity<List<String>> getBookedSeats(@RequestParam String movie) {
-        // In ra terminal để theo dõi
-        System.out.println("---> YÊU CẦU KIỂM TRA GHẾ");
-        System.out.println("Tên phim khách vừa chọn: " + movie);
+    // 3. API MỚI: TẢI LỊCH SỬ MUA HÀNG (Mỗi lần 20 đơn)
+    @GetMapping("/history")
+    public ResponseEntity<List<Booking>> getHistory(
+            @RequestParam String username, 
+            @RequestParam(defaultValue = "0") int page) {
         
-        // Tìm trong Database các vé của đúng phim này
-        List<Booking> bookings = bookingRepository.findByMovieName(movie);
+        // Tạo yêu cầu phân trang: trang số 'page', mỗi trang 20 phần tử
+        Pageable pageable = PageRequest.of(page, 20); 
+        List<Booking> history = bookingRepository.findByUsernameOrderByIdDesc(username, pageable);
         
-        // Trích xuất chỉ lấy danh sách mã ghế (ví dụ: ["A1", "A2"])
-        List<String> bookedSeats = bookings.stream()
-                .map(Booking::getSeatNumber)
-                .collect(Collectors.toList());
-                
-        System.out.println("Các ghế đã có người ngồi: " + bookedSeats);
-        return ResponseEntity.ok(bookedSeats);
+        return ResponseEntity.ok(history);
     }
 
-    @Autowired
-    private AccountRepository accountRepository;
-
-    // API ĐĂNG NHẬP (CẢNH BÁO BẢO MẬT)
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest request) {
-        // 1. Tìm tài khoản trong Database
-        Account account = accountRepository.findByUsername(request.getUsername());
-
-        // 2. Kiểm tra xem tài khoản có tồn tại và sai mật khẩu không
-        if (account == null || !account.getPassword().equals(request.getPassword())) {
-            return ResponseEntity.status(401).body("Sai tài khoản hoặc mật khẩu!");
-        }
-
-        // 3. Nếu đúng, trả về quyền (Role) của người đó
-        return ResponseEntity.ok(account.getRole());
-    }
-
-    // 3. API XÓA SẠCH DỮ LIỆU ĐẶT VÉ (Cần được bảo vệ, chỉ cho phép Admin)
+    // 4. API XÓA GHẾ THEO PHIM (Dành cho Admin)
     @DeleteMapping("/clear")
-    public ResponseEntity<String> clearAllBookings() {
-        // Hàm deleteAll() có sẵn của Spring Data JPA
-        bookingRepository.deleteAll();
-        
-        System.out.println("---> ĐÃ XÓA TOÀN BỘ DỮ LIỆU GHẾ!");
-        return ResponseEntity.ok("Đã reset toàn bộ rạp phim thành công.");
+    public ResponseEntity<String> clearBookingsByMovie(
+            @RequestParam String movie, 
+            @RequestParam String room, 
+            @RequestParam String date, 
+            @RequestParam String time) {
+            
+        bookingRepository.deleteByMovieNameAndRoomAndShowDateAndShowTime(movie, room, date, time);
+        return ResponseEntity.ok("Đã reset ghế.");
     }
 }
