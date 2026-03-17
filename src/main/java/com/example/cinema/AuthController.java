@@ -32,14 +32,14 @@ public class AuthController {
         if (accountRepository.existsByUsername(newAccount.getUsername())) {
             return ResponseEntity.badRequest().body("Tài khoản đã tồn tại!");
         }
-        // Ép cứng role là USER
+        // Ép role là USER
         newAccount.setRole("USER");
         accountRepository.save(newAccount);
         System.out.println("---> ĐĂNG KÝ MỚI: " + newAccount.getUsername() + " | SĐT: " + newAccount.getPhone());
         return ResponseEntity.ok("Đăng ký thành công!");
     }
 
-    // API MỚI: Check username trực tiếp lúc đang gõ
+    // API Check username trực tiếp lúc đang gõ
     @GetMapping("/check-username")
     public ResponseEntity<Boolean> checkUsername(@RequestParam String username) {
         boolean exists = accountRepository.existsByUsername(username);

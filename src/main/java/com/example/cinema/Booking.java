@@ -11,9 +11,8 @@ public class Booking {
     private String username;    
     private String movieName;   
     
-    // 2 CỘT MỚI THÊM
-    private String showDate;    // Ngày chiếu (VD: 20/10/2026)
-    private String showTime;    // Giờ chiếu (VD: 18:00)
+    private String showDate;    
+    private String showTime;   
     private String room;
 
     private String seats;       
@@ -22,7 +21,7 @@ public class Booking {
 
     public Booking() {}
 
-    // Getters và Setters
+    // Getters , Setters
     public Long getId() { return id; }
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }

@@ -4,14 +4,14 @@ import java.util.List;
 public class BookingRequest {
     private String username;
     private String movieName;
-    private String showDate;  // Mới
-    private String showTime;  // Mới
+    private String showDate;  
+    private String showTime;  
     private String room;
     private List<String> seats;
     private String foods;
     private int totalPrice;
 
-    // Getters và Setters
+    // Getters , Setters
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
     public String getMovieName() { return movieName; }

@@ -1,104 +1,149 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Trị - Gemini Cinemas</title>
+    <title>Quản Trị - Sou Cinema</title>
     <style>
+        /* --- ĐỒNG BỘ BIẾN MÀU SẮC TỪ INDEX --- */
+        :root {
+            --bg-main: #0f172a;        
+            --bg-panel: #1e293b;       
+            --accent: #00e5ff;         
+            --accent-hover: #00b3cc;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --warning: #f59e0b;
+            --warning-hover: #d97706;
+            --border: #334155;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
         body {
-            background-color: #242333;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; padding: 40px 20px;
         }
 
+        /* --- CONTAINER CHÍNH --- */
         .admin-container {
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 30px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 900px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            background: var(--bg-panel); padding: 35px 40px;
+            border-radius: 16px; width: 100%; max-width: 1100px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
         }
 
+        /* --- HEADER --- */
         .header-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #555;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px; margin-bottom: 30px;
+        }
+        .header-info h2 {
+            color: var(--accent); font-size: 26px; text-transform: uppercase; letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+        }
+        .admin-profile { display: flex; align-items: center; gap: 15px; }
+        .admin-profile span { font-size: 16px; color: var(--text-muted); }
+        .admin-profile b { color: var(--accent); font-size: 18px; }
+
+        h3 {
+            font-size: 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+            color: #fff; border-left: 4px solid var(--accent); padding-left: 10px;
         }
 
-        /* Nút cơ bản */
+        /* --- HỆ THỐNG NÚT BẤM (GIỮ NGUYÊN TÊN CLASS CỦA JS) --- */
         button {
-            padding: 8px 15px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            color: #000;
+            padding: 10px 18px; border-radius: 8px; border: none; font-weight: bold;
+            cursor: pointer; transition: all 0.3s ease; font-size: 14px;
         }
-        .btn-logout { background-color: #555; color: white; }
-        .btn-danger { background-color: #ff4d4d; color: white; }
-        .btn-primary { background-color: #6feaf6; }
-        .btn-warning { background-color: #f1c40f; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        
+        .btn-logout { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+        .btn-logout:hover { background: var(--border); color: #fff; }
+        
+        .btn-danger { background: var(--danger); color: white; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2); }
+        .btn-danger:hover { background: var(--danger-hover); }
+        
+        .btn-primary { background: var(--accent); color: #000; box-shadow: 0 4px 15px rgba(0, 229, 255, 0.2); }
+        .btn-primary:hover { background: var(--accent-hover); }
+        
+        .btn-warning { background: var(--warning); color: #000; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2); }
+        .btn-warning:hover { background: var(--warning-hover); }
 
-        /* Form nhập liệu */
+        /* --- FORM NHẬP LIỆU --- */
         .form-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            align-items: center;
-            flex-wrap: wrap; /* Cho phép xuống dòng nếu chật */
+            display: flex; gap: 15px; margin-bottom: 25px; align-items: center; flex-wrap: wrap;
+            background: rgba(15, 23, 42, 0.5); padding: 20px; border-radius: 10px; border: 1px dashed var(--border);
         }
         .form-group input, .form-group select {
-            flex: 1;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #555;
-            background: #333;
-            color: white;
-            min-width: 150px;
+            flex: 1; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--border);
+            background: var(--bg-main); color: var(--text-main); min-width: 180px;
+            font-size: 14px; transition: all 0.3s ease; outline: none;
         }
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.15);
+        }
+        .form-group input[type="file"] { padding: 9px; cursor: pointer; }
 
-        /* Bảng danh sách */
+        /* --- BẢNG DỮ LIỆU --- */
         table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
+            width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px;
+            border-radius: 10px; overflow: hidden; border: 1px solid var(--border);
         }
-        th, td {
-            border: 1px solid #555;
-            padding: 12px;
-            text-align: left;
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { 
+            background: rgba(0, 229, 255, 0.05); color: var(--accent); 
+            font-weight: bold; text-transform: uppercase; font-size: 13px; letter-spacing: 1px;
         }
-        th { background-color: #444; }
-        .poster-img { width: 60px; height: 60px; object-fit: cover; border-radius: 5px; }
+        tr { transition: background 0.3s; background: var(--bg-panel); }
+        tr:hover { background: rgba(255, 255, 255, 0.03); }
+        tr:last-child td { border-bottom: none; } /* Bỏ gạch chân hàng cuối */
         
-        /* Đường kẻ phân cách */
-        hr { border-color: #555; margin: 40px 0; }
+        .poster-img { 
+            width: 60px; height: 80px; object-fit: cover; border-radius: 6px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 1px solid var(--border);
+        }
 
-        /* --- CSS Sơ đồ ghế cho Admin --- */
+        hr { border: none; height: 1px; background: var(--border); margin: 40px 0; }
+
+        /* --- KHU VỰC LỌC & SƠ ĐỒ GHẾ --- */
+        .filter-controls {
+            display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;
+        }
+        .filter-controls > div { flex: 1; min-width: 150px; }
+        .filter-controls label { display: block; color: var(--text-muted); font-size: 13px; margin-bottom: 8px; text-transform: uppercase; }
+        
+        .seat-dashboard {
+            background: var(--bg-main); padding: 30px 20px; border-radius: 12px; margin-top: 25px;
+            border: 1px solid var(--border); text-align: center;
+        }
+        
+        /* Màn hình 3D */
         .screen {
-            background-color: #fff; height: 40px; width: 100%; max-width: 300px;
-            margin: 0 auto 20px auto; transform: rotateX(-45deg);
-            box-shadow: 0 3px 10px rgba(255, 255, 255, 0.7);
+            background: linear-gradient(to bottom, #ffffff, #94a3b8);
+            height: 40px; width: 80%; max-width: 350px; margin: 0 auto 30px auto;
+            transform: perspective(300px) rotateX(-15deg); border-radius: 6px;
+            box-shadow: 0 15px 30px rgba(0, 229, 255, 0.3);
         }
-        .seat-map-admin { perspective: 1000px; margin-top: 20px; overflow-x: auto; }
-        .row { display: flex; justify-content: center; }
+        
+        .seat-map-admin { display: flex; flex-direction: column; gap: 10px; overflow-x: auto; padding-bottom: 10px;}
+        .row { display: flex; justify-content: center; gap: 10px; }
         .seat {
-            background-color: #444451; height: 30px; width: 35px;
-            margin: 5px; border-radius: 5px 5px 0 0;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 11px; font-weight: bold; color: #aaa;
+            background: var(--border); height: 35px; width: 40px; margin: 0;
+            border-radius: 8px 8px 4px 4px; display: flex; justify-content: center; align-items: center;
+            font-size: 12px; font-weight: bold; color: var(--text-muted); cursor: default;
+            border-bottom: 4px solid #1e293b; transition: all 0.3s;
         }
-        .seat.occupied { background-color: #ff4d4d; color: #fff; } /* Admin nhìn thấy ghế đã bán màu Đỏ cho dễ quản lý */
-    
+        /* Ghế trống màu xám, ghế có khách màu ĐỎ (Danger) */
+        .seat.occupied { 
+            background: var(--danger); border-bottom-color: #991b1b; 
+            color: #fff; box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -106,8 +151,8 @@
     <div class="admin-container">
         <div class="header-info">
             <h2>Bảng Điều Khiển Admin</h2>
-            <div>
-                <span>Xin chào, <b id="adminName">Admin</b>! </span>
+            <div class="admin-profile">
+                <span>Trực ban: <b id="adminName">Admin</b></span>
                 <button id="logoutBtn" class="btn-logout">Đăng xuất</button>
             </div>
         </div>
@@ -117,63 +162,76 @@
             <input type="hidden" id="movieId">
             <input type="text" id="movieTitle" placeholder="Tên phim (VD: Dune 2)" required>
             <input type="number" id="moviePrice" placeholder="Giá vé (VNĐ)" required>
-            <label style="color: #ccc;">Poster:</label>
-            <input type="file" id="moviePosterFile" accept="image/*" required>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label style="color: var(--text-muted); white-space: nowrap;">Poster:</label>
+                <input type="file" id="moviePosterFile" accept="image/*" required>
+            </div>
             <button type="submit" id="saveBtn" class="btn-primary">➕ Thêm Phim</button>
             <button type="button" id="cancelBtn" class="btn-logout" style="display: none;">Hủy</button>
         </form>
-        <table>
-            <thead><tr><th>Ảnh</th><th>Tên Phim</th><th>Giá Vé</th><th>Hành Động</th></tr></thead>
-            <tbody id="movieTableBody"></tbody>
-        </table>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead><tr><th width="80">Ảnh</th><th>Tên Phim</th><th>Giá Vé</th><th width="200">Hành Động</th></tr></thead>
+                <tbody id="movieTableBody"></tbody>
+            </table>
+        </div>
 
         <hr>
 
-        <h3>🍿 Quản Lý Bắp Nước</h3>
+        <h3>🍿 Quản Lý Menu Đồ Ăn</h3>
         <form id="foodForm" class="form-group" enctype="multipart/form-data">
             <input type="hidden" id="foodId">
             <input type="text" id="foodName" placeholder="Tên món (VD: Combo 1 Bắp 2 Nước)" required>
             <input type="number" id="foodPrice" placeholder="Giá tiền (VNĐ)" required>
-            <label style="color: #ccc;">Ảnh:</label>
-            <input type="file" id="foodImageFile" accept="image/*" required>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label style="color: var(--text-muted); white-space: nowrap;">Ảnh:</label>
+                <input type="file" id="foodImageFile" accept="image/*" required>
+            </div>
             <button type="submit" id="saveFoodBtn" class="btn-primary">➕ Thêm Món</button>
             <button type="button" id="cancelFoodBtn" class="btn-logout" style="display: none;">Hủy</button>
         </form>
-        <table>
-            <thead><tr><th>Ảnh</th><th>Tên Combo</th><th>Giá Tiền</th><th>Hành Động</th></tr></thead>
-            <tbody id="foodTableBody"></tbody>
-        </table>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead><tr><th width="80">Ảnh</th><th>Tên Món</th><th>Giá Tiền</th><th width="200">Hành Động</th></tr></thead>
+                <tbody id="foodTableBody"></tbody>
+            </table>
+        </div>
 
         <hr>
 
-        <h3>🎟️ Theo Dõi & Quản Lý Ghế Ngồi</h3>
-        <div class="form-group" style="align-items: flex-end;">
-            <div style="flex: 1;">
-                <label style="color: #ccc; font-size: 14px;">Phim:</label>
+        <h3>🎟️ Theo Dõi & Quản Lý Phòng Chiếu</h3>
+        <div class="filter-controls">
+            <div>
+                <label>Phim Đang Chiếu</label>
                 <select id="adminMovieSelect" style="width: 100%;"></select>
             </div>
-            <div style="flex: 1;">
-                <label style="color: #ccc; font-size: 14px;">Rạp:</label>
+            <div>
+                <label>Rạp</label>
                 <select id="adminRoomSelect" style="width: 100%;">
                     <option value="Rạp 1">Rạp 1</option>
                     <option value="Rạp 2">Rạp 2</option>
                     <option value="Rạp 3">Rạp 3</option>
                 </select>
             </div>
-            <div style="flex: 1;">
-                <label style="color: #ccc; font-size: 14px;">Ngày:</label>
+            <div>
+                <label>Ngày Chiếu</label>
                 <select id="adminDateSelect" style="width: 100%;"></select>
             </div>
-            <div style="flex: 1;">
-                <label style="color: #ccc; font-size: 14px;">Giờ:</label>
+            <div>
+                <label>Giờ Chiếu</label>
                 <select id="adminTimeSelect" style="width: 100%;"></select>
             </div>
             
-            <button id="viewSeatsBtn" class="btn-primary" style="height: 42px;">👁️ Lọc</button>
-            <button id="clearMovieSeatsBtn" class="btn-danger" style="height: 42px;">🗑️ Xóa rạp này</button>
+            <button id="viewSeatsBtn" class="btn-primary" style="height: 44px;">👁️ Lọc Dữ Liệu</button>
+            <button id="clearMovieSeatsBtn" class="btn-danger" style="height: 44px;">🗑️ Xóa sạch rạp này</button>
         </div>
-        <div style="background: #333; padding: 20px; border-radius: 5px; margin-top: 20px; text-align: center;">
-            <p style="margin-top: 0; color: #ccc;"><b>Trạng thái phòng chiếu:</b> (Màu đỏ là đã có khách mua)</p>
+
+        <div class="seat-dashboard">
+            <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 14px;">
+                <b>Trạng thái:</b> Ghế xám là còn trống, ghế <span style="color: var(--danger); font-weight: bold;">Màu Đỏ</span> là đã có khách mua.
+            </p>
             <div class="seat-map-admin">
                 <div class="screen"></div>
                 <div class="row">
@@ -225,10 +283,10 @@
                     movieTableBody.innerHTML += `
                         <tr>
                             <td><img src="http://localhost:8080/api/movies/image/${movie.posterFileName}" class="poster-img" onerror="this.src='https://via.placeholder.com/60'"></td>
-                            <td>${movie.title}</td>
-                            <td>${movie.price.toLocaleString()} VNĐ</td>
+                            <td><strong style="color: #fff; font-size: 15px;">${movie.title}</strong></td>
+                            <td style="color: var(--accent); font-weight: bold;">${movie.price.toLocaleString()} VNĐ</td>
                             <td>
-                                <button class="btn-warning" onclick="editMovie(${movie.id}, '${movie.title}', ${movie.price})">✏️ Sửa</button>
+                                <button class="btn-warning" onclick="editMovie(${movie.id}, '${movie.title}', ${movie.price})" style="margin-right: 5px;">✏️ Sửa</button>
                                 <button class="btn-danger" onclick="deleteMovie(${movie.id})">❌ Xóa</button>
                             </td>
                         </tr>`;
@@ -303,10 +361,10 @@
                     foodTableBody.innerHTML += `
                         <tr>
                             <td><img src="http://localhost:8080/api/foods/image/${food.imageFileName}" class="poster-img" onerror="this.src='https://via.placeholder.com/60'"></td>
-                            <td>${food.name}</td>
-                            <td>${food.price.toLocaleString()} VNĐ</td>
+                            <td><strong style="color: #fff; font-size: 15px;">${food.name}</strong></td>
+                            <td style="color: var(--accent); font-weight: bold;">${food.price.toLocaleString()} VNĐ</td>
                             <td>
-                                <button class="btn-warning" onclick="editFood(${food.id}, '${food.name}', ${food.price})">✏️ Sửa</button>
+                                <button class="btn-warning" onclick="editFood(${food.id}, '${food.name}', ${food.price})" style="margin-right: 5px;">✏️ Sửa</button>
                                 <button class="btn-danger" onclick="deleteFood(${food.id})">❌ Xóa</button>
                             </td>
                         </tr>`;
@@ -360,13 +418,12 @@
         // ==========================================
         // LOGIC 3: THEO DÕI GHẾ THEO PHIM
         // ==========================================
-        const bookedSeatsDisplay = document.getElementById('bookedSeatsDisplay');
         const adminRoomSelect = document.getElementById('adminRoomSelect');
         const adminDateSelect = document.getElementById('adminDateSelect');
         const adminTimeSelect = document.getElementById('adminTimeSelect');
         const baseTimes = ["09:00", "13:30", "18:00", "21:00"];
 
-        // Tạo 3 ngày chiếu giống bên Khách
+        // Tạo 3 ngày chiếu
         for(let i=0; i<3; i++) {
             let d = new Date(); d.setDate(d.getDate() + i);
             adminDateSelect.innerHTML += `<option value="${d.toLocaleDateString('vi-VN')}">${d.toLocaleDateString('vi-VN')}</option>`;
@@ -394,11 +451,9 @@
                 const response = await fetch(`http://localhost:8080/api/booked-seats?movie=${encodeURIComponent(m)}&room=${encodeURIComponent(r)}&date=${encodeURIComponent(d)}&time=${encodeURIComponent(t)}`);
                 const bookedSeats = await response.json();
 
-                // Quét tất cả các ghế trên màn hình Admin
                 const allAdminSeats = document.querySelectorAll('.seat-map-admin .seat');
                 allAdminSeats.forEach(seat => {
-                    seat.classList.remove('occupied'); // Tẩy màu đỏ đi
-                    // Nếu ghế đó nằm trong danh sách đã bán -> Tô màu đỏ
+                    seat.classList.remove('occupied'); 
                     if (bookedSeats.includes(seat.getAttribute('data-seat'))) {
                         seat.classList.add('occupied');
                     }

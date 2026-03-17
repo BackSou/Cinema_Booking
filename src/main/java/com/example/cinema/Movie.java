@@ -13,7 +13,6 @@ public class Movie {
     private String title;
     private double price;
     
-    // Đổi tên để lưu TÊN FILE thay vì URL
     private String posterFileName; 
 
     public Movie() {}
@@ -23,7 +22,7 @@ public class Movie {
         this.price = price;
     }
 
-    // Getters và Setters
+    // Getters , Setters
     public Long getId() { return id; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }

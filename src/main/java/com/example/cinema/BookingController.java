@@ -17,7 +17,7 @@ public class BookingController {
     @Autowired
     private BookingRepository bookingRepository;
 
-    // 1. API ĐẶT VÉ (Lưu thành 1 hóa đơn)
+    // API ĐẶT VÉ 
     @PostMapping("/book")
     public ResponseEntity<String> bookTickets(@RequestBody BookingRequest request) {
         Booking booking = new Booking();
@@ -34,7 +34,7 @@ public class BookingController {
         return ResponseEntity.ok("Thành công");
     }
 
-    // 2. API LẤY GHẾ ĐÃ BÁN (Cắt chuỗi ra lại thành mảng)
+    // API LẤY GHẾ ĐÃ BÁN (
    @GetMapping("/booked-seats")
     public ResponseEntity<List<String>> getBookedSeats(
             @RequestParam String movie, 
@@ -52,20 +52,20 @@ public class BookingController {
         return ResponseEntity.ok(allBookedSeats);
     }
 
-    // 3. API MỚI: TẢI LỊCH SỬ MUA HÀNG (Mỗi lần 20 đơn)
+    // API TẢI LỊCH SỬ MUA HÀNG 
     @GetMapping("/history")
     public ResponseEntity<List<Booking>> getHistory(
             @RequestParam String username, 
             @RequestParam(defaultValue = "0") int page) {
         
-        // Tạo yêu cầu phân trang: trang số 'page', mỗi trang 20 phần tử
+        // phân trang
         Pageable pageable = PageRequest.of(page, 20); 
         List<Booking> history = bookingRepository.findByUsernameOrderByIdDesc(username, pageable);
         
         return ResponseEntity.ok(history);
     }
 
-    // 4. API XÓA GHẾ THEO PHIM (Dành cho Admin)
+    // API XÓA GHẾ THEO PHIM (admin)
     @DeleteMapping("/clear")
     public ResponseEntity<String> clearBookingsByMovie(
             @RequestParam String movie, 

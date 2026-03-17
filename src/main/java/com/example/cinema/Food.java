@@ -10,9 +10,9 @@ public class Food {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    private String name;        // Tên combo (VD: Combo Bắp Phô Mai + 2 Nước)
-    private double price;       // Giá tiền
-    private String imageFileName; // Tên file ảnh
+    private String name;        
+    private double price;      
+    private String imageFileName; 
 
     public Food() {}
 
@@ -21,7 +21,7 @@ public class Food {
         this.price = price;
     }
 
-    // Getters và Setters
+    // Getters , Setters
     public Long getId() { return id; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

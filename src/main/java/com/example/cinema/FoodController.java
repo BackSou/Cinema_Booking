@@ -26,13 +26,13 @@ public class FoodController {
 
     private final Path fileStorageLocation = Paths.get("uploads").toAbsolutePath().normalize();
 
-    // 1. Lấy danh sách đồ ăn
+    // Lấy danh sách đồ ăn
     @GetMapping
     public List<Food> getAllFoods() {
         return foodRepository.findAll();
     }
 
-    // 2. API đọc ảnh đồ ăn (dùng chung thư mục uploads)
+    // API đọc ảnh đồ ăn
     @GetMapping("/image/{fileName:.+}")
     public ResponseEntity<Resource> downloadImage(@PathVariable String fileName) {
         try {
@@ -50,7 +50,7 @@ public class FoodController {
         }
     }
 
-    // 3. Thêm Đồ ăn (có tải ảnh)
+    // Thêm Đồ ăn
     @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<Food> addFood(
             @RequestParam("name") String name,
@@ -68,7 +68,7 @@ public class FoodController {
         return ResponseEntity.ok(foodRepository.save(food));
     }
 
-    // 4. Cập nhật Đồ ăn
+    //Cập nhật Đồ ăn
     @PutMapping(value = "/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<Food> updateFood(
             @PathVariable Long id,
@@ -91,7 +91,7 @@ public class FoodController {
         return ResponseEntity.ok(foodRepository.save(food));
     }
 
-    // 5. Xóa Đồ ăn
+    //Xóa Đồ ăn
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteFood(@PathVariable Long id) {
         foodRepository.deleteById(id);

@@ -1,189 +1,311 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đặt Vé - Gemini Cinemas</title>
+    <title>Đặt Vé - Sou-Cinema</title>
     <style>
+        /* --- RESET & BIẾN MÀU SẮC TỔNG THỂ --- */
+        :root {
+            --bg-main: #0f172a;        /* Xanh đen sâu */
+            --bg-panel: #1e293b;       /* Nổi bật nhẹ */
+            --accent: #00e5ff;         /* Màu Cyan phát sáng (Neon) */
+            --accent-hover: #00b3cc;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --border: #334155;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
         body {
-            background-color: #242333;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0;
-            padding-bottom: 50px;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; padding-bottom: 50px;
         }
 
-        /* --- Header --- */
+        /* --- HEADER SIÊU MƯỢT --- */
         .header {
-            width: 100%;
-            padding: 15px 30px;
-            background: #1a1927;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-sizing: border-box;
-            border-bottom: 2px solid #6feaf6;
+            width: 100%; padding: 15px 5%;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 50;
         }
-        .logout-btn { background: #ff4d4d; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        .header h1 { color: var(--accent); font-size: 24px; letter-spacing: 2px; text-transform: uppercase; }
+        .user-actions { display: flex; gap: 15px; align-items: center; }
+        .user-greeting { font-size: 16px; color: var(--text-muted); }
+        .user-greeting b { color: var(--accent); }
+        
+        button { font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+        .btn-history { background: transparent; color: var(--warning); border: 1px solid var(--warning); padding: 8px 16px; border-radius: 6px; }
+        .btn-history:hover { background: var(--warning); color: #000; }
+        .btn-logout { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 8px 16px; border-radius: 6px; }
+        .btn-logout:hover { background: var(--danger); color: #fff; }
 
-        /* --- Bố cục chính chia 2 cột --- */
+        /* --- BỐ CỤC CHÍNH --- */
         .main-layout {
-            display: flex;
-            gap: 40px;
-            margin-top: 30px;
-            width: 90%;
-            max-width: 1200px;
-            align-items: flex-start;
+            display: grid; grid-template-columns: 2fr 1fr;
+            gap: 30px; margin-top: 40px;
+            width: 95%; max-width: 1200px;
         }
 
-        /* Cột trái: Phim & Ghế */
-        .left-col { flex: 2; display: flex; flex-direction: column; align-items: center; }
-        
-        /* Cột phải: Đồ ăn & Thanh toán */
-        .right-col { flex: 1; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; border: 1px solid #444; }
+        /* --- PANEL CHUNG --- */
+        .panel {
+            background: var(--bg-panel); padding: 25px;
+            border-radius: 16px; border: 1px solid var(--border);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
 
-        /* --- Khu vực chọn phim --- */
-        .movie-container { margin-bottom: 20px; display: flex; align-items: center; gap: 10px;}
-        .movie-container select { padding: 10px; border-radius: 5px; font-size: 16px; background: #fff; }
+        /* --- KHU VỰC LỌC THÔNG TIN (DROPDOWN) --- */
+        .filter-container { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 30px; }
+        .filter-group { flex: 1; min-width: 120px; display: flex; flex-direction: column; }
+        .filter-group label { color: var(--text-muted); font-size: 13px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .filter-group select {
+            appearance: none; background: var(--bg-main); color: var(--text-main);
+            border: 1px solid var(--border); padding: 12px 15px; border-radius: 8px;
+            font-size: 15px; outline: none; cursor: pointer; transition: 0.3s;
+        }
+        .filter-group select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.2); }
+        .price-badge { background: rgba(0, 229, 255, 0.1); color: var(--accent); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid rgba(0, 229, 255, 0.3); }
 
-        /* --- Khu vực rạp chiếu --- */
+        /* --- SÂN KHẤU & GHẾ NGỒI --- */
+        .seat-map-container { display: flex; flex-direction: column; align-items: center; }
+        .screen-container { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 40px; }
         .screen {
-            background-color: #fff;
-            height: 70px;
-            width: 100%;
-            margin: 15px 0;
-            transform: rotateX(-45deg);
-            box-shadow: 0 3px 10px rgba(255, 255, 255, 0.7);
+            background: linear-gradient(to bottom, #ffffff, #94a3b8);
+            height: 60px; width: 80%; max-width: 400px;
+            transform: perspective(300px) rotateX(-15deg);
+            border-radius: 8px;
+            box-shadow: 0 20px 40px rgba(0, 229, 255, 0.4); /* Màn hình hắt sáng Xanh */
         }
-        .seat-map { perspective: 1000px; margin-bottom: 30px; }
-        .row { display: flex; justify-content: center; }
-        .seat {
-            background-color: #444451; height: 30px; width: 35px;
-            margin: 5px; border-radius: 5px 5px 0 0; cursor: pointer; transition: 0.1s;
-            /* Thêm 3 dòng này để hiện chữ A1, A2 ra giữa ghế */
-            display: flex; justify-content: center; align-items: center;
-            font-size: 11px; font-weight: bold; color: #aaa;
-        }
-        .seat.selected { background-color: #6feaf6; }
-        .seat.occupied { background-color: #fff; cursor: not-allowed; }
-        .seat:not(.occupied):hover { transform: scale(1.2); }
-        
-        /* Chú thích ghế */
-        .showcase { display: flex; gap: 20px; list-style-type: none; padding: 0; color: #777; }
-        .showcase li { display: flex; align-items: center; gap: 5px; }
+        .screen-text { margin-top: 10px; color: var(--text-muted); font-size: 12px; letter-spacing: 3px; }
 
-        /* --- Khu vực Đồ ăn --- */
+        .seat-map { display: flex; flex-direction: column; gap: 10px; }
+        .row { display: flex; justify-content: center; gap: 10px; }
+        .seat {
+            background: var(--border); color: var(--text-muted);
+            height: 35px; width: 40px; border-radius: 8px 8px 4px 4px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 12px; font-weight: bold; cursor: pointer;
+            border-bottom: 4px solid #1e293b; /* Hiệu ứng 3D */
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .seat:hover:not(.occupied) { transform: translateY(-4px); background: #475569; }
+        .seat.selected {
+            background: var(--accent); color: #000;
+            border-bottom-color: var(--accent-hover);
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+        .seat.occupied {
+            background: var(--danger); border-bottom-color: #b91c1c;
+            color: rgba(255,255,255,0.4); cursor: not-allowed; opacity: 0.6;
+        }
+
+        .showcase { display: flex; justify-content: center; gap: 20px; list-style: none; margin: 30px 0 10px; color: var(--text-muted); font-size: 14px; }
+        .showcase li { display: flex; align-items: center; gap: 8px; }
+        .showcase .seat { height: 25px; width: 25px; cursor: default; }
+
+        /* --- ĐỒ ĂN & THANH TOÁN (RIGHT COL) --- */
         .food-item {
             display: flex; justify-content: space-between; align-items: center;
-            background: #333; padding: 10px; border-radius: 5px; margin-bottom: 10px;
+            background: var(--bg-main); padding: 12px; border-radius: 10px; margin-bottom: 12px;
+            border: 1px solid var(--border);
         }
         .food-info { display: flex; align-items: center; gap: 15px; }
-        .food-img { width: 50px; height: 50px; border-radius: 5px; object-fit: cover; }
-        .qty-controls { display: flex; align-items: center; gap: 10px; }
-        .qty-btn { background: #6feaf6; color: #000; border: none; width: 25px; height: 25px; border-radius: 3px; cursor: pointer; font-weight: bold;}
+        .food-img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
+        .food-name { font-weight: bold; font-size: 15px; }
+        .food-price { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
         
-        /* --- Tổng tiền & Đặt vé --- */
-        .checkout-panel { margin-top: 30px; border-top: 1px solid #555; padding-top: 20px; }
-        .total-text { font-size: 20px; margin-bottom: 15px; }
-        .total-price { color: #6feaf6; font-size: 28px; font-weight: bold; }
-        .book-btn { background: #6feaf6; color: #000; font-size: 18px; font-weight: bold; padding: 15px; width: 100%; border: none; border-radius: 5px; cursor: pointer; }
-        .book-btn:hover { background: #5bc3cc; }
+        .qty-controls { display: flex; align-items: center; gap: 10px; background: var(--bg-panel); border-radius: 6px; padding: 4px; border: 1px solid var(--border);}
+        .qty-btn { background: transparent; color: var(--text-main); border: none; width: 28px; height: 28px; border-radius: 4px; font-size: 16px; }
+        .qty-btn:hover { background: var(--border); }
+        .qty-val { width: 20px; text-align: center; font-weight: bold; }
 
+        .checkout-panel { margin-top: 25px; padding-top: 20px; border-top: 1px dashed var(--border); }
+        .total-row { display: flex; justify-content: space-between; margin-bottom: 10px; color: var(--text-muted); }
+        .total-final { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; font-size: 18px; color: #fff; font-weight: bold; }
+        .total-price { color: var(--accent); font-size: 26px; }
+
+        .book-btn {
+            background: var(--accent); color: #000; font-size: 18px; text-transform: uppercase; letter-spacing: 1px;
+            padding: 16px; width: 100%; border: none; border-radius: 8px; margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
+        }
+        .book-btn:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 229, 255, 0.4); }
+
+        #message { margin-top: 15px; text-align: center; min-height: 20px; font-weight: bold; }
+
+        /* --- MODAL LỊCH SỬ NHÌN XỊN XÒ --- */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(5px); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: var(--bg-panel); width: 90%; max-width: 650px; max-height: 85vh;
+            border-radius: 16px; padding: 25px; border: 1px solid var(--border);
+            display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px; }
+        .modal-header h3 { font-size: 20px; display: flex; align-items: center; gap: 10px; }
+        .btn-close { background: var(--border); color: #fff; border: none; padding: 8px 12px; border-radius: 6px; }
+        .btn-close:hover { background: var(--danger); }
+        
+        .history-list { overflow-y: auto; flex: 1; padding-right: 5px; }
+        /* Style cho thanh cuộn */
+        .history-list::-webkit-scrollbar { width: 6px; }
+        .history-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        
+        .history-card {
+            background: var(--bg-main); border-left: 4px solid var(--accent);
+            padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--border);
+        }
+        .btn-loadmore { background: var(--border); color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; margin-top: 15px; display: none; }
+        .btn-loadmore:hover { background: #475569; }
+
+        /* Responsive mượt mà */
+        @media (max-width: 900px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .header { flex-direction: column; gap: 15px; }
+        }
+
+        /* --- KHU VỰC HIỂN THỊ POSTER PHIM TRỰC QUAN --- */
+        .movie-preview {
+            display: flex; gap: 20px; align-items: flex-end; margin-bottom: 25px;
+            padding-bottom: 20px; border-bottom: 1px solid var(--border);
+        }
+        .preview-poster {
+            width: 130px; height: 180px; object-fit: cover; border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5); border: 1px solid var(--border);
+        }
+        .preview-info { display: flex; flex-direction: column; gap: 10px; }
+        .preview-title { font-size: 26px; color: #fff; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .preview-tags { display: flex; gap: 10px; }
+        .tag { background: rgba(0, 229, 255, 0.1); color: var(--accent); padding: 5px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; border: 1px solid rgba(0, 229, 255, 0.3); }
     </style>
 </head>
 <body>
 
-    <div style="display: flex; gap: 15px; align-items: center;">
-            <span>Xin chào, <b id="userName" style="color: #6feaf6;">Khách</b>!</span>
-            <button id="historyBtn" style="background: #f1c40f; color: #000; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">🧾 Lịch sử mua hàng</button>
-            <button id="logoutUserBtn" class="logout-btn">Đăng xuất</button>
-    </div>
+    <header class="header">
+        <h1>N-Cinema</h1>
+        <div class="user-actions">
+            <span class="user-greeting">Xin chào, <b id="userName">Khách</b></span>
+            <button id="historyBtn" class="btn-history">Lịch sử vé</button>
+            <button id="logoutUserBtn" class="btn-logout">Đăng xuất</button>
+        </div>
+    </header>
 
-    <div id="historyModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
-        <div style="background: #242333; width: 600px; max-height: 80vh; border-radius: 10px; padding: 20px; border: 1px solid #6feaf6; display: flex; flex-direction: column;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #555; padding-bottom: 10px;">
-                <h3 style="margin: 0;">🧾 Lịch sử mua vé của bạn</h3>
-                <button id="closeHistoryBtn" style="background: #ff4d4d; border: none; color: white; border-radius: 5px; padding: 5px 10px; cursor: pointer;">Đóng ❌</button>
+    <div id="historyModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🎟️ Vé Đã Đặt</h3>
+                <button id="closeHistoryBtn" class="btn-close">Đóng ✕</button>
             </div>
-            
-            <div id="historyList" style="overflow-y: auto; flex: 1; margin-top: 15px; padding-right: 10px;"></div>
-            
-            <button id="loadMoreBtn" style="margin-top: 15px; background: #6feaf6; color: #000; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; display: none;">⬇️ Xem thêm đơn cũ</button>
+            <div id="historyList" class="history-list"></div>
+            <button id="loadMoreBtn" class="btn-loadmore">Tải thêm vé cũ ⬇</button>
         </div>
     </div>
 
     <div class="main-layout">
         
-        <div class="left-col">
-            <div class="movie-container" style="display: flex; flex-wrap: wrap; gap: 15px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; border: 1px solid #444; width: 100%; box-sizing: border-box;">
-                <div style="display: flex; flex-direction: column; flex: 1; min-width: 150px;">
-                    <label style="color: #ccc; font-size: 14px; margin-bottom: 5px;">🎬 Phim:</label>
+        <div class="panel">
+            <div class="filter-container">
+                <div class="movie-preview">
+                    <img id="selectedMoviePoster" class="preview-poster" src="https://via.placeholder.com/130x180?text=Loading..." alt="Poster">
+                    <div class="preview-info">
+                        <h2 id="selectedMovieTitle" class="preview-title">Đang tải phim...</h2>
+                        <div class="preview-tags">
+                            <span class="tag">🎬 2D Phụ Đề</span>
+                            <span class="tag" id="previewPriceTag">0 VNĐ</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-group" style="flex: 2;">
+                    <label>Phim Đang Chiếu</label>
                     <select id="movie"></select>
                 </div>
-                <div style="display: flex; flex-direction: column; flex: 1; min-width: 100px;">
-                    <label style="color: #ccc; font-size: 14px; margin-bottom: 5px;">🚪 Rạp:</label>
+                <div class="filter-group">
+                    <label>Phòng Chiếu</label>
                     <select id="roomSelect">
                         <option value="Rạp 1">Rạp 1</option>
                         <option value="Rạp 2">Rạp 2</option>
                         <option value="Rạp 3">Rạp 3</option>
                     </select>
                 </div>
-                <div style="display: flex; flex-direction: column; flex: 1; min-width: 130px;">
-                    <label style="color: #ccc; font-size: 14px; margin-bottom: 5px;">📅 Ngày:</label>
+                <div class="filter-group">
+                    <label>Ngày Chiếu</label>
                     <select id="showDate"></select>
                 </div>
-                <div style="display: flex; flex-direction: column; flex: 1; min-width: 100px;">
-                    <label style="color: #ccc; font-size: 14px; margin-bottom: 5px;">⏰ Giờ:</label>
+                <div class="filter-group">
+                    <label>Suất Chiếu</label>
                     <select id="showTime"></select>
-                </div>
-                <div style="width: 100%; text-align: center; margin-top: 10px;">
-                    <span style="color: #fff;">Giá vé: </span>
-                    <span id="moviePriceDisplay" style="color: #6feaf6; font-weight: bold; font-size: 20px;">0 VNĐ</span>
                 </div>
             </div>
 
-            <ul class="showcase">
-                <li><div class="seat"></div> Trống</li>
-                <li><div class="seat selected"></div> Đang chọn</li>
-                <li><div class="seat occupied"></div> Đã bán</li>
-            </ul>
+            <div class="seat-map-container">
+                <div class="screen-container">
+                    <div class="screen"></div>
+                    <div class="screen-text">MÀN HÌNH CHÍNH</div>
+                </div>
 
-            <div class="seat-map">
-                <div class="screen"></div>
-                <div class="row">
-                    <div class="seat" data-seat="A1">A1</div><div class="seat" data-seat="A2">A2</div>
-                    <div class="seat" data-seat="A3">A3</div><div class="seat" data-seat="A4">A4</div>
-                    <div class="seat" data-seat="A5">A5</div><div class="seat" data-seat="A6">A6</div>
+                <div class="seat-map">
+                    <div class="row">
+                        <div class="seat" data-seat="A1">A1</div><div class="seat" data-seat="A2">A2</div>
+                        <div class="seat" data-seat="A3">A3</div><div class="seat" data-seat="A4">A4</div>
+                        <div class="seat" data-seat="A5">A5</div><div class="seat" data-seat="A6">A6</div>
+                    </div>
+                    <div class="row">
+                        <div class="seat" data-seat="B1">B1</div><div class="seat" data-seat="B2">B2</div>
+                        <div class="seat" data-seat="B3">B3</div><div class="seat" data-seat="B4">B4</div>
+                        <div class="seat" data-seat="B5">B5</div><div class="seat" data-seat="B6">B6</div>
+                    </div>
+                    <div class="row">
+                        <div class="seat" data-seat="C1">C1</div><div class="seat" data-seat="C2">C2</div>
+                        <div class="seat" data-seat="C3">C3</div><div class="seat" data-seat="C4">C4</div>
+                        <div class="seat" data-seat="C5">C5</div><div class="seat" data-seat="C6">C6</div>
+                    </div>
                 </div>
-                <div class="row">
-                    <div class="seat" data-seat="B1">B1</div><div class="seat" data-seat="B2">B2</div>
-                    <div class="seat" data-seat="B3">B3</div><div class="seat" data-seat="B4">B4</div>
-                    <div class="seat" data-seat="B5">B5</div><div class="seat" data-seat="B6">B6</div>
-                </div>
-                <div class="row">
-                    <div class="seat" data-seat="C1">C1</div><div class="seat" data-seat="C2">C2</div>
-                    <div class="seat" data-seat="C3">C3</div><div class="seat" data-seat="C4">C4</div>
-                    <div class="seat" data-seat="C5">C5</div><div class="seat" data-seat="C6">C6</div>
-                </div>
+
+                <ul class="showcase">
+                    <li><div class="seat"></div> Trống</li>
+                    <li><div class="seat selected"></div> Đang chọn</li>
+                    <li><div class="seat occupied"></div> Đã bán</li>
+                </ul>
             </div>
         </div>
 
-        <div class="right-col">
-            <h3>🍔 Chọn Bắp Nước</h3>
+        <div class="panel">
+            <h3 style="margin-bottom: 20px; font-size: 18px;">🍿 Bắp Nước Ăn Kèm</h3>
             <div id="foodContainer">
-                <p style="color: #777;">Đang tải danh sách món...</p>
+                <p style="color: var(--text-muted); text-align: center;">Đang tải menu...</p>
             </div>
 
             <div class="checkout-panel">
-                <div class="total-text">Tiền ghế: <span id="seatsTotalCost">0</span> VNĐ</div>
-                <div class="total-text">Tiền ăn: <span id="foodsTotalCost">0</span> VNĐ</div>
-                <div class="total-text" style="margin-top: 20px;">TỔNG CỘNG: <br> <span class="total-price" id="grandTotal">0</span> VNĐ</div>
+                <div class="total-row">
+                    <span>Giá vé gốc (1 ghế):</span>
+                    <span id="moviePriceDisplay" style="color: #fff;">0 VNĐ</span>
+                </div>
+                <div class="total-row">
+                    <span>Tiền ghế đã chọn:</span>
+                    <span><span id="seatsTotalCost" style="color: #fff;">0</span> VNĐ</span>
+                </div>
+                <div class="total-row">
+                    <span>Tiền bắp nước:</span>
+                    <span><span id="foodsTotalCost" style="color: #fff;">0</span> VNĐ</span>
+                </div>
                 
-                <p id="message" style="color: #6feaf6; text-align: center;"></p>
+                <div class="total-final">
+                    <span>TỔNG CỘNG</span>
+                    <span class="total-price"><span id="grandTotal">0</span> đ</span>
+                </div>
+                
                 <button id="bookBtn" class="book-btn">Xác Nhận Đặt Vé</button>
+                <p id="message" style="color: var(--accent);"></p>
             </div>
         </div>
 
@@ -209,16 +331,34 @@
         const showDateSelect = document.getElementById('showDate');
         const showTimeSelect = document.getElementById('showTime');
         const roomSelect = document.getElementById('roomSelect');
-        const baseShowTimes = ["09:00", "13:30", "18:00", "21:00"]; // Khung giờ gốc
+        const baseShowTimes = ["09:00", "13:30", "18:00", "21:00"]; 
         
         let currentMoviePrice = 0;
-        let foodCart = {}; // Lưu số lượng mỗi món: { "foodId_1": 2, "foodId_2": 1 }
-        let foodDataList = []; // Lưu trữ mảng đồ ăn tải từ server
+        let foodCart = {}; 
+        let foodDataList = []; 
 
-        // --- 3. TẢI DỮ LIỆU TỪ SERVER (PHIM & ĐỒ ĂN) ---
+        // --- HÀM MỚI: CẬP NHẬT ẢNH POSTER ---
+        function updateMoviePreview() {
+            const selectedOption = movieSelect.options[movieSelect.selectedIndex];
+            if (!selectedOption) return;
+            
+            const title = selectedOption.value;
+            const price = parseInt(selectedOption.getAttribute('data-price'));
+            const posterFile = selectedOption.getAttribute('data-poster');
+            
+            document.getElementById('selectedMovieTitle').innerText = title;
+            document.getElementById('previewPriceTag').innerText = price.toLocaleString('vi-VN') + " đ";
+            
+            if (posterFile && posterFile !== 'null') {
+                document.getElementById('selectedMoviePoster').src = `http://localhost:8080/api/movies/image/${posterFile}`;
+            } else {
+                document.getElementById('selectedMoviePoster').src = 'https://via.placeholder.com/130x180?text=No+Image';
+            }
+        }
+
+        // --- 3. TẢI DỮ LIỆU TỪ SERVER ---
         async function loadInitialData() {
             try {
-                // Tải Phim
                 const movieRes = await fetch('http://localhost:8080/api/movies');
                 const movies = await movieRes.json();
                 
@@ -226,68 +366,61 @@
                 movies.forEach(movie => {
                     const option = document.createElement('option');
                     option.value = movie.title;
-                    option.setAttribute('data-price', movie.price); // Giấu giá tiền vào thuộc tính
+                    option.setAttribute('data-price', movie.price); 
+                    option.setAttribute('data-poster', movie.posterFileName); // Nhét túi bí mật
                     option.textContent = movie.title;
                     movieSelect.appendChild(option);
                 });
 
-                // Cập nhật giá phim đầu tiên
                 if(movies.length > 0) {
                     currentMoviePrice = movies[0].price;
-                    moviePriceDisplay.innerText = currentMoviePrice.toLocaleString() + " VNĐ/ghế";
-                    fetchBookedSeats(); // Tải ghế của phim đầu tiên
+                    moviePriceDisplay.innerText = currentMoviePrice.toLocaleString() + " VNĐ";
+                    fetchBookedSeats(); 
+                    updateMoviePreview(); // Gọi hàm hiện ảnh cho phim đầu tiên
                 }
 
-                // Tải Đồ Ăn
                 const foodRes = await fetch('http://localhost:8080/api/foods');
                 foodDataList = await foodRes.json();
                 
                 foodContainer.innerHTML = '';
                 foodDataList.forEach(food => {
-                    foodCart[food.id] = 0; // Khởi tạo giỏ hàng mỗi món = 0
+                    foodCart[food.id] = 0; 
                     
                     const foodHtml = `
                         <div class="food-item">
                             <div class="food-info">
-                                <img src="http://localhost:8080/api/foods/image/${food.imageFileName}" class="food-img" onerror="this.src='https://via.placeholder.com/50'">
+                                <img src="http://localhost:8080/api/foods/image/${food.imageFileName}" class="food-img" onerror="this.src='https://via.placeholder.com/60'">
                                 <div>
-                                    <div style="font-weight: bold;">${food.name}</div>
-                                    <div style="color: #ccc; font-size: 14px;">${food.price.toLocaleString()} VNĐ</div>
+                                    <div class="food-name">${food.name}</div>
+                                    <div class="food-price">${food.price.toLocaleString()} VNĐ</div>
                                 </div>
                             </div>
                             <div class="qty-controls">
                                 <button class="qty-btn" onclick="updateFoodQty(${food.id}, -1)">-</button>
-                                <span id="qty-${food.id}" style="width: 20px; text-align: center;">0</span>
+                                <span id="qty-${food.id}" class="qty-val">0</span>
                                 <button class="qty-btn" onclick="updateFoodQty(${food.id}, 1)">+</button>
                             </div>
                         </div>
                     `;
                     foodContainer.innerHTML += foodHtml;
-
-                    // DỌN SẠCH DỮ LIỆU CŨ ĐỂ KHÔNG BỊ LẶP
-                showDateSelect.innerHTML = '';
-
-                    // Tự động tạo 3 Ngày chiếu tính từ hôm nay
-                    for(let i=0; i<3; i++) {
-                        let d = new Date();
-                        d.setDate(d.getDate() + i);
-                        let dateStr = d.toLocaleDateString('vi-VN'); // VD: 20/10/2026
-                        
-                        let label = i === 0 ? `${dateStr}` : i === 1 ? `${dateStr}` : dateStr;
-                        showDateSelect.innerHTML += `<option value="${dateStr}">${label}</option>`;
-                    }
-                    
-                    // Sau khi mọi thứ load xong, gọi hàm lấy ghế
-                    updateDynamicShowTimes();
                 });
+
+                showDateSelect.innerHTML = '';
+                for(let i=0; i<3; i++) {
+                    let d = new Date();
+                    d.setDate(d.getDate() + i);
+                    let dateStr = d.toLocaleDateString('vi-VN'); 
+                    let label = i === 0 ? `${dateStr}` : i === 1 ? `${dateStr}` : dateStr;
+                    showDateSelect.innerHTML += `<option value="${dateStr}">${label}</option>`;
+                }
+                updateDynamicShowTimes();
                 
             } catch (error) {
-                console.error("Lỗi kết nối máy chủ:", error);
+                console.error("Lỗi:", error);
                 alert("Lỗi tải dữ liệu. Hãy chắc chắn Server Java đang chạy!");
             }
         }
 
-        // HÀM TÍNH TOÁN GIỜ THEO RẠP
         function updateDynamicShowTimes() {
             const room = roomSelect.value;
             let offset = 0;
@@ -298,11 +431,10 @@
             baseShowTimes.forEach(time => {
                 let [h, m] = time.split(':');
                 let newH = parseInt(h) + offset;
-                // Đảm bảo định dạng 2 chữ số (VD: 09 thay vì 9)
                 let formattedH = newH < 10 ? '0' + newH : newH;
                 showTimeSelect.innerHTML += `<option value="${formattedH}:${m}">${formattedH}:${m}</option>`;
             });
-            fetchBookedSeats(); // Cập nhật lại ghế sau khi đổi giờ
+            fetchBookedSeats(); 
         }
 
         // --- 4. TẢI GHẾ ĐÃ BÁN ---
@@ -327,57 +459,41 @@
             } catch (error) { console.error(error); }
         }
 
-        // Bắt các sự kiện thay đổi
+        // BẮT SỰ KIỆN ĐỔI PHIM
         movieSelect.addEventListener('change', (e) => {
             currentMoviePrice = parseInt(e.target.options[e.target.selectedIndex].getAttribute('data-price'));
             moviePriceDisplay.innerText = currentMoviePrice.toLocaleString('vi-VN') + " VNĐ";
             fetchBookedSeats();
+            updateMoviePreview(); // Gọi hàm đổi ảnh khi khách chọn phim khác
         });
         roomSelect.addEventListener('change', updateDynamicShowTimes);
         showDateSelect.addEventListener('change', fetchBookedSeats);
         showTimeSelect.addEventListener('change', fetchBookedSeats);
 
-        // Khi khách đổi phim -> Cập nhật giá, load lại ghế, tính lại tiền
-        movieSelect.addEventListener('change', (e) => {
-            currentMoviePrice = parseInt(e.target.options[e.target.selectedIndex].getAttribute('data-price'));
-            moviePriceDisplay.innerText = currentMoviePrice.toLocaleString() + " VNĐ/ghế";
-            fetchBookedSeats();
-        });
-
-        // --- 5. LOGIC CHỌN GHẾ & CHỌN ĐỒ ĂN ---
-        
-        // Chọn ghế
+        // --- 5. LOGIC CHỌN GHẾ & ĐỒ ĂN ---
         document.querySelector('.seat-map').addEventListener('click', (e) => {
             if (e.target.classList.contains('seat') && !e.target.classList.contains('occupied')) {
                 e.target.classList.toggle('selected');
-                updateCartTotal(); // Tính lại tiền mỗi lần click
+                updateCartTotal(); 
             }
         });
 
-        // Chọn đồ ăn
         window.updateFoodQty = function(foodId, change) {
             let currentQty = foodCart[foodId];
             let newQty = currentQty + change;
-            
-            if(newQty >= 0 && newQty <= 10) { // Giới hạn mua tối đa 10 combo/loại
+            if(newQty >= 0 && newQty <= 10) { 
                 foodCart[foodId] = newQty;
                 document.getElementById(`qty-${foodId}`).innerText = newQty;
-                updateCartTotal(); // Tính lại tiền
+                updateCartTotal(); 
             }
         }
 
-        // HÀM TÍNH TỔNG TIỀN (Quan trọng nhất)
-        // Thêm biến này để lưu số tiền thật
         let currentGrandTotal = 0; 
-
-        // HÀM TÍNH TỔNG TIỀN (Quan trọng nhất)
         function updateCartTotal() {
-            // 1. Tính tiền ghế
             const selectedSeatsCount = document.querySelectorAll('.row .seat.selected').length;
             const seatsCost = selectedSeatsCount * currentMoviePrice;
             document.getElementById('seatsTotalCost').innerText = seatsCost.toLocaleString('vi-VN');
 
-            // 2. Tính tiền đồ ăn
             let foodsCost = 0;
             foodDataList.forEach(food => {
                 let qty = foodCart[food.id];
@@ -385,7 +501,6 @@
             });
             document.getElementById('foodsTotalCost').innerText = foodsCost.toLocaleString('vi-VN');
 
-            // 3. Tổng cộng
             currentGrandTotal = seatsCost + foodsCost;
             document.getElementById('grandTotal').innerText = currentGrandTotal.toLocaleString('vi-VN');
         }
@@ -396,11 +511,9 @@
             const seatsArray = [...selectedSeats].map(seat => seat.getAttribute('data-seat'));
             
             if (seatsArray.length === 0) {
-                alert("Bạn phải chọn ít nhất 1 ghế để xem phim chứ!");
-                return;
+                alert("Bạn phải chọn ít nhất 1 ghế để xem phim chứ!"); return;
             }
 
-            // Tổng hợp đồ ăn thành chuỗi
             let foodDetailsArray = [];
             for (let id in foodCart) {
                 if (foodCart[id] > 0) {
@@ -409,13 +522,12 @@
                 }
             }
 
-            // GÓI DỮ LIỆU ĐẦY ĐỦ (Bổ sung chính xác Rạp, Ngày, Giờ)
             const bookingData = {
                 username: currentUser,
                 movieName: movieSelect.value,
-                room: roomSelect.value,          // Bắt buộc phải có dòng này
-                showDate: showDateSelect.value,  // Bắt buộc phải có dòng này
-                showTime: showTimeSelect.value,  // Bắt buộc phải có dòng này
+                room: roomSelect.value,  
+                showDate: showDateSelect.value,  
+                showTime: showTimeSelect.value,  
                 seats: seatsArray,
                 foods: foodDetailsArray.length > 0 ? foodDetailsArray.join(", ") : "Không có",
                 totalPrice: currentGrandTotal
@@ -429,113 +541,86 @@
                 });
                 
                 if(response.ok) {
-                    // Hiện thông báo
-                    document.getElementById('message').innerText = "🎉 Đặt vé thành công! Tổng hóa đơn: " + currentGrandTotal.toLocaleString('vi-VN') + " VNĐ";
+                    document.getElementById('message').innerText = "🎉 Đặt vé thành công! Tổng: " + currentGrandTotal.toLocaleString('vi-VN') + " đ";
                     
-                    // Biến ghế vừa mua thành occupied (xám/đỏ tùy CSS)
                     selectedSeats.forEach(seat => {
                         seat.classList.remove('selected');
                         seat.classList.add('occupied');
                     });
 
-                    // Reset bắp nước về 0
                     for (let foodId in foodCart) {
                         foodCart[foodId] = 0; 
                         const qtySpan = document.getElementById(`qty-${foodId}`);
-                        if (qtySpan) {
-                            qtySpan.innerText = "0";
-                        }
+                        if (qtySpan) qtySpan.innerText = "0";
                     }
 
-                    // Tính lại tiền về 0
                     updateCartTotal(); 
-
-                    setTimeout(() => {
-                        document.getElementById('message').innerText = "";
-                    }, 5000);
+                    setTimeout(() => { document.getElementById('message').innerText = ""; }, 5000);
                 } else {
                     alert("Lỗi khi lưu dữ liệu đặt vé!");
                 }
-
             } catch (error) {
                 document.getElementById('message').innerText = "Lỗi kết nối đến server.";
             }
         });
 
-        // BẮT ĐẦU CHẠY
         loadInitialData();
 
-    // ==========================================
-        // 7. LOGIC LỊCH SỬ MUA HÀNG & PHÂN TRANG
-        // ==========================================
+        // --- 7. LOGIC LỊCH SỬ ---
         const historyModal = document.getElementById('historyModal');
         const historyList = document.getElementById('historyList');
         const loadMoreBtn = document.getElementById('loadMoreBtn');
-        let currentHistoryPage = 0; // Trang hiện tại
+        let currentHistoryPage = 0; 
 
-        // Mở Modal
         document.getElementById('historyBtn').addEventListener('click', () => {
             historyModal.style.display = 'flex';
-            currentHistoryPage = 0; // Reset về trang 0
-            historyList.innerHTML = ''; // Xóa dữ liệu cũ
+            currentHistoryPage = 0; 
+            historyList.innerHTML = ''; 
             loadHistory();
         });
 
-        // Đóng Modal
         document.getElementById('closeHistoryBtn').addEventListener('click', () => {
             historyModal.style.display = 'none';
         });
 
-        // Nút Xem thêm
         loadMoreBtn.addEventListener('click', () => {
-            currentHistoryPage++;
-            loadHistory();
+            currentHistoryPage++; loadHistory();
         });
 
-        // Hàm gọi API tải lịch sử
         async function loadHistory() {
             try {
                 const res = await fetch(`http://localhost:8080/api/history?username=${currentUser}&page=${currentHistoryPage}`);
                 const orders = await res.json();
 
                 if (orders.length === 0 && currentHistoryPage === 0) {
-                    historyList.innerHTML = '<p style="text-align: center; color: #ccc;">Bạn chưa mua vé nào.</p>';
+                    historyList.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin-top: 20px;">Bạn chưa mua vé nào.</p>';
                     loadMoreBtn.style.display = 'none';
                     return;
                 }
 
                 orders.forEach(order => {
                     const orderHtml = `
-                        <div style="background: #333; border-left: 4px solid #6feaf6; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <b style="color: #6feaf6;">🎬 ${order.movieName}</b>
-                                <span style="color: #f1c40f; font-weight: bold;">${order.totalPrice.toLocaleString('vi-VN')} VNĐ</span>
+                        <div class="history-card">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <b style="color: var(--accent); font-size: 16px;">🎬 ${order.movieName}</b>
+                                <span style="color: var(--warning); font-weight: bold;">${order.totalPrice.toLocaleString('vi-VN')} đ</span>
                             </div>
-                            
-                            <div style="font-size: 14px; color: #fff; margin-bottom: 5px; background: #444; padding: 5px; border-radius: 3px; display: inline-block;">
-                                📍 ${order.room} | 📅 ${order.showDate} | ⏰ ${order.showTime}
+                            <div style="font-size: 13px; color: var(--text-main); margin-bottom: 8px; background: rgba(0,0,0,0.2); padding: 6px 10px; border-radius: 4px; display: inline-block;">
+                                📍 ${order.room} &nbsp;|&nbsp; 📅 ${order.showDate} &nbsp;|&nbsp; ⏰ ${order.showTime}
                             </div>
-                            
-                            <div style="font-size: 14px; color: #ccc;">🎟️ Ghế: ${order.seats}</div>
-                            <div style="font-size: 14px; color: #ccc;">🍿 Combo: ${order.foods}</div>
+                            <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">🎟️ Ghế: <span style="color: #fff;">${order.seats}</span></div>
+                            <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">🍿 Combo: <span style="color: #fff;">${order.foods}</span></div>
                         </div>
                     `;
                     historyList.innerHTML += orderHtml;
                 });
 
-                // Nếu trả về đủ 20 đơn -> Có thể còn nữa -> Hiện nút "Xem thêm"
-                // Nếu trả về < 20 đơn -> Đã hết sạch -> Ẩn nút "Xem thêm"
-                if (orders.length === 20) {
-                    loadMoreBtn.style.display = 'block';
-                } else {
-                    loadMoreBtn.style.display = 'none';
-                }
-
+                if (orders.length === 20) { loadMoreBtn.style.display = 'block'; } 
+                else { loadMoreBtn.style.display = 'none'; }
             } catch (error) {
-                historyList.innerHTML = '<p style="color: red;">Lỗi kết nối máy chủ.</p>';
+                historyList.innerHTML = '<p style="color: var(--danger);">Lỗi kết nối máy chủ.</p>';
             }
         }
-
     </script>
 </body>
 </html>

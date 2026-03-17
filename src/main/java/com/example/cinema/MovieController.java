@@ -24,11 +24,9 @@ public class MovieController {
     @Autowired
     private MovieRepository movieRepository;
 
-    // Đường dẫn thư mục để lưu ảnh trên máy tính của bạn
     private final Path fileStorageLocation = Paths.get("uploads").toAbsolutePath().normalize();
 
     public MovieController() {
-        // Tự động tạo thư mục 'uploads' nếu nó chưa tồn tại
         try {
             Files.createDirectories(this.fileStorageLocation);
         } catch (Exception ex) {
@@ -36,21 +34,19 @@ public class MovieController {
         }
     }
 
-    // 1. API LẤY DANH SÁCH PHIM
+    //API LẤY DANH SÁCH PHIM
     @GetMapping
     public List<Movie> getAllMovies() {
         return movieRepository.findAll();
     }
 
-    // 2. API PHỤ: GIÚP TRÌNH DUYỆT ĐỌC ĐƯỢC ẢNH
-    // Khi web khách gọi tới: http://localhost:8080/api/movies/image/ten_file.jpg
+    // API GIÚP TRÌNH DUYỆT ĐỌC ĐƯỢC ẢNH
     @GetMapping("/image/{fileName:.+}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileName) {
         try {
             Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
             Resource resource = new UrlResource(filePath.toUri());
             if(resource.exists()) {
-                // Tự động xác định loại ảnh (png, jpg, webp...)
                 String contentType = "image/jpeg";
                 return ResponseEntity.ok()
                         .contentType(MediaType.parseMediaType(contentType))
@@ -63,25 +59,23 @@ public class MovieController {
         }
     }
 
-    // 3. API THÊM PHIM MỚI + TẢI ẢNH (POST)
+    // API POST
     @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<Movie> addMovieWithImage(
             @RequestParam("title") String title,
             @RequestParam("price") double price,
             @RequestParam("posterFile") MultipartFile file) throws IOException {
 
-        // Bước A: Lưu file ảnh
         String fileName = saveFile(file);
 
-        // Bước B: Tạo đối tượng phim và lưu vào DB
         Movie movie = new Movie(title, price);
-        movie.setPosterFileName(fileName); // Lưu tên file vào database
+        movie.setPosterFileName(fileName); 
         
         System.out.println("---> ADMIN ĐÃ THÊM PHIM & ẢNH: " + movie.getTitle());
         return ResponseEntity.ok(movieRepository.save(movie));
     }
 
-    // 4. API CẬP NHẬT PHIM (PUT)
+    // PUT
     @PutMapping(value = "/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<Movie> updateMovie(
             @PathVariable Long id,
@@ -94,9 +88,7 @@ public class MovieController {
         movie.setTitle(title);
         movie.setPrice(price);
         
-        // Nếu admin có tải lên ảnh mới
         if(file != null && !file.isEmpty()) {
-            // Lưu ảnh mới
             String newFileName = saveFile(file);
             movie.setPosterFileName(newFileName);
         }
@@ -105,7 +97,7 @@ public class MovieController {
         return ResponseEntity.ok(movieRepository.save(movie));
     }
 
-    // 5. API XÓA PHIM
+    // API XÓA 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteMovie(@PathVariable Long id) {
         movieRepository.deleteById(id);
@@ -113,17 +105,15 @@ public class MovieController {
         return ResponseEntity.ok("Đã xóa phim thành công!");
     }
 
-    // --- HÀM PHỤ ĐỂ LƯU FILE ---
     private String saveFile(MultipartFile file) throws IOException {
-        // Tạo một tên file duy nhất (để không bị trùng)
         String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
         
-        // Đường dẫn đầy đủ để lưu file
         Path targetLocation = this.fileStorageLocation.resolve(fileName);
         
-        // Copy file ảnh vào thư mục 'uploads'
         Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
         
         return fileName;
     }
+
+    
 }
