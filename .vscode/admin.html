@@ -82,6 +82,23 @@
         
         /* Đường kẻ phân cách */
         hr { border-color: #555; margin: 40px 0; }
+
+        /* --- CSS Sơ đồ ghế cho Admin --- */
+        .screen {
+            background-color: #fff; height: 40px; width: 100%; max-width: 300px;
+            margin: 0 auto 20px auto; transform: rotateX(-45deg);
+            box-shadow: 0 3px 10px rgba(255, 255, 255, 0.7);
+        }
+        .seat-map-admin { perspective: 1000px; margin-top: 20px; overflow-x: auto; }
+        .row { display: flex; justify-content: center; }
+        .seat {
+            background-color: #444451; height: 30px; width: 35px;
+            margin: 5px; border-radius: 5px 5px 0 0;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 11px; font-weight: bold; color: #aaa;
+        }
+        .seat.occupied { background-color: #ff4d4d; color: #fff; } /* Admin nhìn thấy ghế đã bán màu Đỏ cho dễ quản lý */
+    
     </style>
 </head>
 <body>
@@ -155,8 +172,26 @@
             <button id="viewSeatsBtn" class="btn-primary" style="height: 42px;">👁️ Lọc</button>
             <button id="clearMovieSeatsBtn" class="btn-danger" style="height: 42px;">🗑️ Xóa rạp này</button>
         </div>
-        <div style="background: #333; padding: 15px; border-radius: 5px; text-align: left; border-left: 4px solid #6feaf6;">
-            <p style="margin: 0;"><b>Các ghế đã bán: </b> <span id="bookedSeatsDisplay" style="color: #6feaf6;">Đang tải...</span></p>
+        <div style="background: #333; padding: 20px; border-radius: 5px; margin-top: 20px; text-align: center;">
+            <p style="margin-top: 0; color: #ccc;"><b>Trạng thái phòng chiếu:</b> (Màu đỏ là đã có khách mua)</p>
+            <div class="seat-map-admin">
+                <div class="screen"></div>
+                <div class="row">
+                    <div class="seat" data-seat="A1">A1</div><div class="seat" data-seat="A2">A2</div>
+                    <div class="seat" data-seat="A3">A3</div><div class="seat" data-seat="A4">A4</div>
+                    <div class="seat" data-seat="A5">A5</div><div class="seat" data-seat="A6">A6</div>
+                </div>
+                <div class="row">
+                    <div class="seat" data-seat="B1">B1</div><div class="seat" data-seat="B2">B2</div>
+                    <div class="seat" data-seat="B3">B3</div><div class="seat" data-seat="B4">B4</div>
+                    <div class="seat" data-seat="B5">B5</div><div class="seat" data-seat="B6">B6</div>
+                </div>
+                <div class="row">
+                    <div class="seat" data-seat="C1">C1</div><div class="seat" data-seat="C2">C2</div>
+                    <div class="seat" data-seat="C3">C3</div><div class="seat" data-seat="C4">C4</div>
+                    <div class="seat" data-seat="C5">C5</div><div class="seat" data-seat="C6">C6</div>
+                </div>
+            </div>
         </div>
 
     </div>
@@ -357,13 +392,18 @@
             if(!m || !d || !t) return;
             try {
                 const response = await fetch(`http://localhost:8080/api/booked-seats?movie=${encodeURIComponent(m)}&room=${encodeURIComponent(r)}&date=${encodeURIComponent(d)}&time=${encodeURIComponent(t)}`);
-                const seats = await response.json();
-                if (seats.length === 0) {
-                    bookedSeatsDisplay.innerText = "Trống"; bookedSeatsDisplay.style.color = "#ccc";
-                } else {
-                    bookedSeatsDisplay.innerText = seats.join(', '); bookedSeatsDisplay.style.color = "#6feaf6";
-                }
-            } catch (error) { bookedSeatsDisplay.innerText = "Lỗi tải dữ liệu!"; }
+                const bookedSeats = await response.json();
+
+                // Quét tất cả các ghế trên màn hình Admin
+                const allAdminSeats = document.querySelectorAll('.seat-map-admin .seat');
+                allAdminSeats.forEach(seat => {
+                    seat.classList.remove('occupied'); // Tẩy màu đỏ đi
+                    // Nếu ghế đó nằm trong danh sách đã bán -> Tô màu đỏ
+                    if (bookedSeats.includes(seat.getAttribute('data-seat'))) {
+                        seat.classList.add('occupied');
+                    }
+                });
+            } catch (error) { console.error("Lỗi tải dữ liệu ghế!"); }
         }
 
         document.getElementById('viewSeatsBtn').addEventListener('click', loadBookedSeats);
@@ -382,6 +422,7 @@
         // Khởi chạy khi vừa mở trang Admin
         fetchMovies();
         fetchFoods();
+        updateAdminTimes();
     </script>
 </body>
 </html>

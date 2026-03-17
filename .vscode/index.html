@@ -61,10 +61,11 @@
         .seat-map { perspective: 1000px; margin-bottom: 30px; }
         .row { display: flex; justify-content: center; }
         .seat {
-            background-color: #444451;
-            height: 26px; width: 32px;
-            margin: 5px; border-radius: 5px 5px 0 0;
-            cursor: pointer; transition: 0.1s;
+            background-color: #444451; height: 30px; width: 35px;
+            margin: 5px; border-radius: 5px 5px 0 0; cursor: pointer; transition: 0.1s;
+            /* Thêm 3 dòng này để hiện chữ A1, A2 ra giữa ghế */
+            display: flex; justify-content: center; align-items: center;
+            font-size: 11px; font-weight: bold; color: #aaa;
         }
         .seat.selected { background-color: #6feaf6; }
         .seat.occupied { background-color: #fff; cursor: not-allowed; }
@@ -153,19 +154,19 @@
             <div class="seat-map">
                 <div class="screen"></div>
                 <div class="row">
-                    <div class="seat" data-seat="A1"></div><div class="seat" data-seat="A2"></div>
-                    <div class="seat" data-seat="A3"></div><div class="seat" data-seat="A4"></div>
-                    <div class="seat" data-seat="A5"></div><div class="seat" data-seat="A6"></div>
+                    <div class="seat" data-seat="A1">A1</div><div class="seat" data-seat="A2">A2</div>
+                    <div class="seat" data-seat="A3">A3</div><div class="seat" data-seat="A4">A4</div>
+                    <div class="seat" data-seat="A5">A5</div><div class="seat" data-seat="A6">A6</div>
                 </div>
                 <div class="row">
-                    <div class="seat" data-seat="B1"></div><div class="seat" data-seat="B2"></div>
-                    <div class="seat" data-seat="B3"></div><div class="seat" data-seat="B4"></div>
-                    <div class="seat" data-seat="B5"></div><div class="seat" data-seat="B6"></div>
+                    <div class="seat" data-seat="B1">B1</div><div class="seat" data-seat="B2">B2</div>
+                    <div class="seat" data-seat="B3">B3</div><div class="seat" data-seat="B4">B4</div>
+                    <div class="seat" data-seat="B5">B5</div><div class="seat" data-seat="B6">B6</div>
                 </div>
                 <div class="row">
-                    <div class="seat" data-seat="C1"></div><div class="seat" data-seat="C2"></div>
-                    <div class="seat" data-seat="C3"></div><div class="seat" data-seat="C4"></div>
-                    <div class="seat" data-seat="C5"></div><div class="seat" data-seat="C6"></div>
+                    <div class="seat" data-seat="C1">C1</div><div class="seat" data-seat="C2">C2</div>
+                    <div class="seat" data-seat="C3">C3</div><div class="seat" data-seat="C4">C4</div>
+                    <div class="seat" data-seat="C5">C5</div><div class="seat" data-seat="C6">C6</div>
                 </div>
             </div>
         </div>
@@ -408,12 +409,13 @@
                 }
             }
 
-            // Gói toàn bộ hóa đơn
+            // GÓI DỮ LIỆU ĐẦY ĐỦ (Bổ sung chính xác Rạp, Ngày, Giờ)
             const bookingData = {
                 username: currentUser,
                 movieName: movieSelect.value,
-                showDate: showDateSelect.value, // Dữ liệu mới
-                showTime: showTimeSelect.value, // Dữ liệu mới
+                room: roomSelect.value,          // Bắt buộc phải có dòng này
+                showDate: showDateSelect.value,  // Bắt buộc phải có dòng này
+                showTime: showTimeSelect.value,  // Bắt buộc phải có dòng này
                 seats: seatsArray,
                 foods: foodDetailsArray.length > 0 ? foodDetailsArray.join(", ") : "Không có",
                 totalPrice: currentGrandTotal
@@ -426,35 +428,34 @@
                     body: JSON.stringify(bookingData)
                 });
                 
-                // Hiển thị thông báo thành công cùng tổng tiền
-                document.getElementById('message').innerText = "🎉 Đặt vé thành công! Tổng hóa đơn: " + document.getElementById('grandTotal').innerText + " VNĐ";
-                
-                // 1. Đổi trạng thái ghế vừa mua thành occupied (xám)
-                selectedSeats.forEach(seat => {
-                    seat.classList.remove('selected');
-                    seat.classList.add('occupied');
-                });
-
-                // ==========================================
-                // 2. CHỨC NĂNG MỚI: RESET BẮP NƯỚC VỀ 0
-                // ==========================================
-                for (let foodId in foodCart) {
-                    foodCart[foodId] = 0; // Đưa dữ liệu giỏ hàng trong Javascript về 0
+                if(response.ok) {
+                    // Hiện thông báo
+                    document.getElementById('message').innerText = "🎉 Đặt vé thành công! Tổng hóa đơn: " + currentGrandTotal.toLocaleString('vi-VN') + " VNĐ";
                     
-                    // Lấy thẻ <span> hiển thị số lượng và ép nó thành số 0
-                    const qtySpan = document.getElementById(`qty-${foodId}`);
-                    if (qtySpan) {
-                        qtySpan.innerText = "0";
+                    // Biến ghế vừa mua thành occupied (xám/đỏ tùy CSS)
+                    selectedSeats.forEach(seat => {
+                        seat.classList.remove('selected');
+                        seat.classList.add('occupied');
+                    });
+
+                    // Reset bắp nước về 0
+                    for (let foodId in foodCart) {
+                        foodCart[foodId] = 0; 
+                        const qtySpan = document.getElementById(`qty-${foodId}`);
+                        if (qtySpan) {
+                            qtySpan.innerText = "0";
+                        }
                     }
+
+                    // Tính lại tiền về 0
+                    updateCartTotal(); 
+
+                    setTimeout(() => {
+                        document.getElementById('message').innerText = "";
+                    }, 5000);
+                } else {
+                    alert("Lỗi khi lưu dữ liệu đặt vé!");
                 }
-
-                // 3. Tính lại tổng tiền (vì ghế đã mất class 'selected' và foodCart về 0, nên hàm này sẽ tự động ép tất cả tiền về 0 VNĐ)
-                updateCartTotal(); 
-
-                // 4. (Tùy chọn) Ẩn dòng chữ chúc mừng sau 5 giây để giao diện sạch sẽ
-                setTimeout(() => {
-                    document.getElementById('message').innerText = "";
-                }, 5000);
 
             } catch (error) {
                 document.getElementById('message').innerText = "Lỗi kết nối đến server.";
@@ -510,6 +511,11 @@
                                 <b style="color: #6feaf6;">🎬 ${order.movieName}</b>
                                 <span style="color: #f1c40f; font-weight: bold;">${order.totalPrice.toLocaleString('vi-VN')} VNĐ</span>
                             </div>
+                            
+                            <div style="font-size: 14px; color: #fff; margin-bottom: 5px; background: #444; padding: 5px; border-radius: 3px; display: inline-block;">
+                                📍 ${order.room} | 📅 ${order.showDate} | ⏰ ${order.showTime}
+                            </div>
+                            
                             <div style="font-size: 14px; color: #ccc;">🎟️ Ghế: ${order.seats}</div>
                             <div style="font-size: 14px; color: #ccc;">🍿 Combo: ${order.foods}</div>
                         </div>
