@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Trị - Gemini Cinemas</title>
+    <style>
+        body {
+            background-color: #242333;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .admin-container {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 900px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #555;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        /* Nút cơ bản */
+        button {
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            color: #000;
+        }
+        .btn-logout { background-color: #555; color: white; }
+        .btn-danger { background-color: #ff4d4d; color: white; }
+        .btn-primary { background-color: #6feaf6; }
+        .btn-warning { background-color: #f1c40f; }
+
+        /* Form nhập liệu */
+        .form-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap; /* Cho phép xuống dòng nếu chật */
+        }
+        .form-group input, .form-group select {
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background: #333;
+            color: white;
+            min-width: 150px;
+        }
+
+        /* Bảng danh sách */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #555;
+            padding: 12px;
+            text-align: left;
+        }
+        th { background-color: #444; }
+        .poster-img { width: 60px; height: 60px; object-fit: cover; border-radius: 5px; }
+        
+        /* Đường kẻ phân cách */
+        hr { border-color: #555; margin: 40px 0; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-container">
+        <div class="header-info">
+            <h2>Bảng Điều Khiển Admin</h2>
+            <div>
+                <span>Xin chào, <b id="adminName">Admin</b>! </span>
+                <button id="logoutBtn" class="btn-logout">Đăng xuất</button>
+            </div>
+        </div>
+
+        <h3>🎬 Quản Lý Phim</h3>
+        <form id="movieForm" class="form-group" enctype="multipart/form-data">
+            <input type="hidden" id="movieId">
+            <input type="text" id="movieTitle" placeholder="Tên phim (VD: Dune 2)" required>
+            <input type="number" id="moviePrice" placeholder="Giá vé (VNĐ)" required>
+            <label style="color: #ccc;">Poster:</label>
+            <input type="file" id="moviePosterFile" accept="image/*" required>
+            <button type="submit" id="saveBtn" class="btn-primary">➕ Thêm Phim</button>
+            <button type="button" id="cancelBtn" class="btn-logout" style="display: none;">Hủy</button>
+        </form>
+        <table>
+            <thead><tr><th>Ảnh</th><th>Tên Phim</th><th>Giá Vé</th><th>Hành Động</th></tr></thead>
+            <tbody id="movieTableBody"></tbody>
+        </table>
+
+        <hr>
+
+        <h3>🍿 Quản Lý Bắp Nước</h3>
+        <form id="foodForm" class="form-group" enctype="multipart/form-data">
+            <input type="hidden" id="foodId">
+            <input type="text" id="foodName" placeholder="Tên món (VD: Combo 1 Bắp 2 Nước)" required>
+            <input type="number" id="foodPrice" placeholder="Giá tiền (VNĐ)" required>
+            <label style="color: #ccc;">Ảnh:</label>
+            <input type="file" id="foodImageFile" accept="image/*" required>
+            <button type="submit" id="saveFoodBtn" class="btn-primary">➕ Thêm Món</button>
+            <button type="button" id="cancelFoodBtn" class="btn-logout" style="display: none;">Hủy</button>
+        </form>
+        <table>
+            <thead><tr><th>Ảnh</th><th>Tên Combo</th><th>Giá Tiền</th><th>Hành Động</th></tr></thead>
+            <tbody id="foodTableBody"></tbody>
+        </table>
+
+        <hr>
+
+        <h3>🎟️ Theo Dõi & Quản Lý Ghế Ngồi</h3>
+        <div class="form-group" style="align-items: flex-end;">
+            <div style="flex: 1;">
+                <label style="color: #ccc; font-size: 14px;">Phim:</label>
+                <select id="adminMovieSelect" style="width: 100%;"></select>
+            </div>
+            <div style="flex: 1;">
+                <label style="color: #ccc; font-size: 14px;">Rạp:</label>
+                <select id="adminRoomSelect" style="width: 100%;">
+                    <option value="Rạp 1">Rạp 1</option>
+                    <option value="Rạp 2">Rạp 2</option>
+                    <option value="Rạp 3">Rạp 3</option>
+                </select>
+            </div>
+            <div style="flex: 1;">
+                <label style="color: #ccc; font-size: 14px;">Ngày:</label>
+                <select id="adminDateSelect" style="width: 100%;"></select>
+            </div>
+            <div style="flex: 1;">
+                <label style="color: #ccc; font-size: 14px;">Giờ:</label>
+                <select id="adminTimeSelect" style="width: 100%;"></select>
+            </div>
+            
+            <button id="viewSeatsBtn" class="btn-primary" style="height: 42px;">👁️ Lọc</button>
+            <button id="clearMovieSeatsBtn" class="btn-danger" style="height: 42px;">🗑️ Xóa rạp này</button>
+        </div>
+        <div style="background: #333; padding: 15px; border-radius: 5px; text-align: left; border-left: 4px solid #6feaf6;">
+            <p style="margin: 0;"><b>Các ghế đã bán: </b> <span id="bookedSeatsDisplay" style="color: #6feaf6;">Đang tải...</span></p>
+        </div>
+
+    </div>
+
+    <script>
+        // --- BẢO MẬT & ĐĂNG XUẤT ---
+        if (localStorage.getItem('currentRole') !== 'ADMIN') window.location.href = 'login.html';
+        document.getElementById('adminName').innerText = localStorage.getItem('currentUser') || 'Admin';
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        });
+
+        // ==========================================
+        // LOGIC 1: QUẢN LÝ PHIM
+        // ==========================================
+        const movieForm = document.getElementById('movieForm');
+        const movieTableBody = document.getElementById('movieTableBody');
+        const saveBtn = document.getElementById('saveBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const adminMovieSelect = document.getElementById('adminMovieSelect');
+
+        async function fetchMovies() {
+            try {
+                const response = await fetch('http://localhost:8080/api/movies');
+                const movies = await response.json();
+                movieTableBody.innerHTML = '';
+                adminMovieSelect.innerHTML = ''; 
+                
+                movies.forEach(movie => {
+                    movieTableBody.innerHTML += `
+                        <tr>
+                            <td><img src="http://localhost:8080/api/movies/image/${movie.posterFileName}" class="poster-img" onerror="this.src='https://via.placeholder.com/60'"></td>
+                            <td>${movie.title}</td>
+                            <td>${movie.price.toLocaleString()} VNĐ</td>
+                            <td>
+                                <button class="btn-warning" onclick="editMovie(${movie.id}, '${movie.title}', ${movie.price})">✏️ Sửa</button>
+                                <button class="btn-danger" onclick="deleteMovie(${movie.id})">❌ Xóa</button>
+                            </td>
+                        </tr>`;
+                    
+                    const option = document.createElement('option');
+                    option.value = movie.title;
+                    option.textContent = movie.title;
+                    adminMovieSelect.appendChild(option);
+                });
+                if(movies.length > 0) loadBookedSeats();
+            } catch (error) { console.error("Lỗi phim:", error); }
+        }
+
+        movieForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('movieId').value;
+            const fileInput = document.getElementById('moviePosterFile');
+            const formData = new FormData();
+            formData.append('title', document.getElementById('movieTitle').value);
+            formData.append('price', document.getElementById('moviePrice').value);
+            if(fileInput.files[0]) formData.append('posterFile', fileInput.files[0]);
+
+            if (id) {
+                await fetch(`http://localhost:8080/api/movies/${id}`, { method: 'PUT', body: formData });
+            } else {
+                if(!fileInput.files[0]) return alert("Vui lòng chọn ảnh poster!");
+                await fetch('http://localhost:8080/api/movies', { method: 'POST', body: formData });
+            }
+            resetMovieForm();
+            fetchMovies();
+        });
+
+        window.editMovie = function(id, title, price) {
+            document.getElementById('movieId').value = id;
+            document.getElementById('movieTitle').value = title;
+            document.getElementById('moviePrice').value = price;
+            document.getElementById('moviePosterFile').required = false; 
+            saveBtn.innerHTML = "💾 Lưu Phim"; saveBtn.className = "btn-warning";
+            cancelBtn.style.display = 'inline-block';
+        };
+
+        window.deleteMovie = async function(id) {
+            if (confirm("Xóa phim này?")) {
+                await fetch(`http://localhost:8080/api/movies/${id}`, { method: 'DELETE' });
+                fetchMovies(); 
+            }
+        };
+
+        function resetMovieForm() {
+            movieForm.reset(); document.getElementById('movieId').value = '';
+            document.getElementById('moviePosterFile').required = true; 
+            saveBtn.innerHTML = "➕ Thêm Phim"; saveBtn.className = "btn-primary";
+            cancelBtn.style.display = 'none';
+        }
+        cancelBtn.addEventListener('click', resetMovieForm);
+
+        // ==========================================
+        // LOGIC 2: QUẢN LÝ ĐỒ ĂN
+        // ==========================================
+        const foodForm = document.getElementById('foodForm');
+        const foodTableBody = document.getElementById('foodTableBody');
+        const saveFoodBtn = document.getElementById('saveFoodBtn');
+        const cancelFoodBtn = document.getElementById('cancelFoodBtn');
+
+        async function fetchFoods() {
+            try {
+                const response = await fetch('http://localhost:8080/api/foods');
+                const foods = await response.json();
+                foodTableBody.innerHTML = '';
+                
+                foods.forEach(food => {
+                    foodTableBody.innerHTML += `
+                        <tr>
+                            <td><img src="http://localhost:8080/api/foods/image/${food.imageFileName}" class="poster-img" onerror="this.src='https://via.placeholder.com/60'"></td>
+                            <td>${food.name}</td>
+                            <td>${food.price.toLocaleString()} VNĐ</td>
+                            <td>
+                                <button class="btn-warning" onclick="editFood(${food.id}, '${food.name}', ${food.price})">✏️ Sửa</button>
+                                <button class="btn-danger" onclick="deleteFood(${food.id})">❌ Xóa</button>
+                            </td>
+                        </tr>`;
+                });
+            } catch (error) { console.error("Lỗi đồ ăn:", error); }
+        }
+
+        foodForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('foodId').value;
+            const fileInput = document.getElementById('foodImageFile');
+            const formData = new FormData();
+            formData.append('name', document.getElementById('foodName').value);
+            formData.append('price', document.getElementById('foodPrice').value);
+            if(fileInput.files[0]) formData.append('imageFile', fileInput.files[0]);
+
+            if (id) {
+                await fetch(`http://localhost:8080/api/foods/${id}`, { method: 'PUT', body: formData });
+            } else {
+                if(!fileInput.files[0]) return alert("Vui lòng chọn ảnh món ăn!");
+                await fetch('http://localhost:8080/api/foods', { method: 'POST', body: formData });
+            }
+            resetFoodForm();
+            fetchFoods();
+        });
+
+        window.editFood = function(id, name, price) {
+            document.getElementById('foodId').value = id;
+            document.getElementById('foodName').value = name;
+            document.getElementById('foodPrice').value = price;
+            document.getElementById('foodImageFile').required = false;
+            saveFoodBtn.innerHTML = "💾 Lưu Món"; saveFoodBtn.className = "btn-warning";
+            cancelFoodBtn.style.display = 'inline-block';
+        };
+
+        window.deleteFood = async function(id) {
+            if (confirm("Xóa món này?")) {
+                await fetch(`http://localhost:8080/api/foods/${id}`, { method: 'DELETE' });
+                fetchFoods();
+            }
+        };
+
+        function resetFoodForm() {
+            foodForm.reset(); document.getElementById('foodId').value = '';
+            document.getElementById('foodImageFile').required = true;
+            saveFoodBtn.innerHTML = "➕ Thêm Món"; saveFoodBtn.className = "btn-primary";
+            cancelFoodBtn.style.display = 'none';
+        }
+        cancelFoodBtn.addEventListener('click', resetFoodForm);
+
+        // ==========================================
+        // LOGIC 3: THEO DÕI GHẾ THEO PHIM
+        // ==========================================
+        const bookedSeatsDisplay = document.getElementById('bookedSeatsDisplay');
+        const adminRoomSelect = document.getElementById('adminRoomSelect');
+        const adminDateSelect = document.getElementById('adminDateSelect');
+        const adminTimeSelect = document.getElementById('adminTimeSelect');
+        const baseTimes = ["09:00", "13:30", "18:00", "21:00"];
+
+        // Tạo 3 ngày chiếu giống bên Khách
+        for(let i=0; i<3; i++) {
+            let d = new Date(); d.setDate(d.getDate() + i);
+            adminDateSelect.innerHTML += `<option value="${d.toLocaleDateString('vi-VN')}">${d.toLocaleDateString('vi-VN')}</option>`;
+        }
+
+        // Cập nhật giờ khi đổi Rạp
+        function updateAdminTimes() {
+            let offset = adminRoomSelect.value === "Rạp 2" ? 1 : adminRoomSelect.value === "Rạp 3" ? 2 : 0;
+            adminTimeSelect.innerHTML = '';
+            baseTimes.forEach(time => {
+                let [h, m] = time.split(':');
+                let newH = parseInt(h) + offset;
+                let formattedH = newH < 10 ? '0' + newH : newH;
+                adminTimeSelect.innerHTML += `<option value="${formattedH}:${m}">${formattedH}:${m}</option>`;
+            });
+            loadBookedSeats();
+        }
+        adminRoomSelect.addEventListener('change', updateAdminTimes);
+
+        async function loadBookedSeats() {
+            const m = adminMovieSelect.value; const r = adminRoomSelect.value;
+            const d = adminDateSelect.value; const t = adminTimeSelect.value;
+            if(!m || !d || !t) return;
+            try {
+                const response = await fetch(`http://localhost:8080/api/booked-seats?movie=${encodeURIComponent(m)}&room=${encodeURIComponent(r)}&date=${encodeURIComponent(d)}&time=${encodeURIComponent(t)}`);
+                const seats = await response.json();
+                if (seats.length === 0) {
+                    bookedSeatsDisplay.innerText = "Trống"; bookedSeatsDisplay.style.color = "#ccc";
+                } else {
+                    bookedSeatsDisplay.innerText = seats.join(', '); bookedSeatsDisplay.style.color = "#6feaf6";
+                }
+            } catch (error) { bookedSeatsDisplay.innerText = "Lỗi tải dữ liệu!"; }
+        }
+
+        document.getElementById('viewSeatsBtn').addEventListener('click', loadBookedSeats);
+        adminMovieSelect.addEventListener('change', loadBookedSeats);
+        adminDateSelect.addEventListener('change', loadBookedSeats);
+        adminTimeSelect.addEventListener('change', loadBookedSeats);
+
+        document.getElementById('clearMovieSeatsBtn').addEventListener('click', async () => {
+            if (confirm(`⚠️ Xóa TOÀN BỘ ghế suất chiếu này?`)) {
+                await fetch(`http://localhost:8080/api/clear?movie=${encodeURIComponent(adminMovieSelect.value)}&room=${encodeURIComponent(adminRoomSelect.value)}&date=${encodeURIComponent(adminDateSelect.value)}&time=${encodeURIComponent(adminTimeSelect.value)}`, { method: 'DELETE' });
+                alert("✅ Đã làm trống rạp!");
+                loadBookedSeats();
+            }
+        });
+
+        // Khởi chạy khi vừa mở trang Admin
+        fetchMovies();
+        fetchFoods();
+    </script>
+</body>
+</html>
